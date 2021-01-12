@@ -1,8 +1,14 @@
+# Python file used to create data to Viestiliiga TV broadcasts
+# 
+# Reads Register file and Teamcsv file
+# Runner Photos must be in the right address shown by register
+# creates Team data csv and HTML interfaces for men and women
+
 import os,sys
 import csv
 tsvFile = "VL-RunnersRegister - Runners.tsv"
 teamcsv_from_irma = "ilmoittautumiset.csv"
-new_csv = "VLteams.csv" # tanne kirjoitetaan joukkuekortit
+new_csv = "VLteams.csv" # writes team card data to this file
 M_HTML = "VL_juoksijakortit_M.html"
 N_HTML = "VL_juoksijakortit_N.html"
 
@@ -16,6 +22,14 @@ class Runner:
 
 
 def name_swap(name):
+    """
+    Changes name from format 
+    Lastname Firstname 
+    => Firstname Lastname
+    Note:
+    There are some names that do
+    not follow this algo
+    """
     l = name.split(' ')
     name = l[-1]
     del l[-1]
@@ -25,6 +39,7 @@ def name_swap(name):
 
 
 def read_runners_and_teams(runnerdir, teamdir):
+    # Runners saved in subdirectories in case of full namesakes
     club_runners = {}
     register = open(tsvFile, 'r', encoding='UTF-8')
     for row in register:
