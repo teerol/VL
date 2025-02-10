@@ -1,0 +1,6 @@
+matplotlib
+aiohttp
+requests
+numpy==1.26.4
+opencv-python==4.11.0.86
+Pillow==11.1.0
