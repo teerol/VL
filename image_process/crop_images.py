@@ -1,6 +1,8 @@
 import os
 import requests
 import cv2
+import argparse
+import asyncio
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import Tuple
@@ -225,11 +227,10 @@ def download_haarcascade() -> None:
             file.write(response.content)
 
 if __name__ == "__main__":
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--show", action="store_true", help="show images, blocks the execution")
     parser.add_argument("--save", action="store_true", help="save images to output_path")
-    parser.add_argument("--latest_run", type=str, default=None, help='Optional parameter, latest run datetime, format "YYYY-MM-DD HH:MM:SS". If not provided, the latest run will be read from "latest_run.txt" or set to beginning of time')
+    parser.add_argument("--latest_run", type=str, default=None, help='Takes only images updated after latest run! Optional parameter, latest run datetime, format "YYYY-MM-DD HH:MM:SS". If not provided, the latest run will be read from "latest_run.txt" or set to beginning of time')
     parser.add_argument("--output_path", type=str, default=None, help="output path to save images. Crop and background removed images will be saved to 'output_path/crop' and 'output_path/bg' respectively")
     parser.add_argument("--rem_bg", action="store_true", help="remove background, NOTE: This is a lot slower and results vary")
 
@@ -238,7 +239,6 @@ if __name__ == "__main__":
     if args.rem_bg:
         import subprocess
         import sys
-        # pip install rembg
         # check if rembg is installed
         try:
             from rembg import remove, new_session
@@ -246,8 +246,6 @@ if __name__ == "__main__":
             subprocess.check_call([sys.executable, "-m", "pip", "install", "rembg[cpu]"])
         from rembg import remove, new_session
 
-    # load_and_crop(args.show, args.save, args.latest_run, args.output_path)
-    import asyncio
     asyncio.run(
         load_and_crop(args.show, args.save, args.latest_run, args.output_path)
     )

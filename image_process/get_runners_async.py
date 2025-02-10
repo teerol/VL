@@ -35,7 +35,7 @@ async def get_new(photo_urls: List[str], latest_run: datetime) -> List[str]:
 
 async def get_runners_async(
         n: int | None = None, 
-        start:int | None = None, 
+        start: int | None = None, 
         latest_run: datetime = datetime(2000,1,1)
     ) -> List[str]:
 
