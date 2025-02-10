@@ -11,7 +11,7 @@ The main file is the `crop_images.py`. In beginning the target image size and wa
 
 **NOTE:** Background removal requires additional library (using neural nets on CPU) and its SLOW.
 
-`get_runners_ansync.py` provides utilities to anyncronously check if there is any updated images loaded. The eventual loading of the image is still syncronous.
+`get_runners_ansync.py` provides utilities to anyncronously check if there is any updated images after latest run. The eventual loading of the image is still syncronous.
 
 ## Installation
 
@@ -21,7 +21,7 @@ The main file is the `crop_images.py`. In beginning the target image size and wa
     cd VL/image_process
     ```
 
-2. Create and activete virtual environment with dependecies 
+2. Create and activate virtual environment with dependencies installed, Note thant rembg is not installed here.
     ```sh
     ./venv.cmd
     ```
@@ -39,7 +39,7 @@ To run the `crop_images.py` script, use the following options:
   --output_path OUTPUT_PATH
                         output path to save images. Crop and background removed images will be saved to
                         'output_path/crop' and 'output_path/bg' respectively
-  --rem_bg              remove background, NOTE: This is a lot slower and results vary.
+  --rem_bg              remove background, NOTE: This is a lot slower and results vary. Rembg is only installed if this is added. By default it install the CPU version.
 ```
 
 ### Example
