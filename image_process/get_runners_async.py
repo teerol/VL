@@ -10,7 +10,7 @@ from io import BytesIO
 
 OFAN_URL = "https://www.team-eerola.fi/vlrunner/get_runners_ofan.php"
 DEFAULT_IMAGE_URL = "https://fanappbucket2022.s3.eu-north-1.amazonaws.com/team_pictures/default_team.jpg"
-CACHE_FILE = "cached_runners.txt"
+CACHE_FILE = "cached/cached_runners.txt"
 
 async def latest_modification_later_than(
         photo_url: str,

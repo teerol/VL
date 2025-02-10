@@ -9,9 +9,11 @@ from pathlib import Path
 
 from get_runners_async import get_runners_async, get_photo
 
-
-FACE_CASCADE = "haarcascade_frontalface_default.xml"
-latest_run_file = "latest_run.txt"
+CACHE_DIR = Path("cached")
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
+FACE_CASCADE = CACHE_DIR / "haarcascade_frontalface_default.xml"
+latest_run_file = CACHE_DIR / "latest_run.txt"
 
 # target metrics for images
 # width, height, width_scale, height_scale
