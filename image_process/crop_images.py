@@ -17,6 +17,8 @@ if not os.path.exists(CACHE_DIR):
 FACE_CASCADE = CACHE_DIR / "haarcascade_frontalface_default.xml"
 latest_run_file = CACHE_DIR / "latest_run.txt"
 
+rembg_model_name = "u2net_human_seg" # birefnet-portrait, sam
+
 # target metrics for images
 # width, height, width_scale, height_scale
 img_stats = 300, 280, 1.9, 0.4 # new setup
@@ -36,7 +38,7 @@ async def load_and_crop(show: bool, save: bool, latest_run: str, output_path) ->
                 latest_run = datetime.strptime(f.read().strip(), "%Y-%m-%d %H:%M:%S")
         print("latest run:", latest_run)
 
-    photo_g = await get_runners_async(latest_run=latest_run, n=10)
+    photo_g = await get_runners_async(latest_run=latest_run)
 
     with open("latest_run.txt", "w") as f:
         f.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -50,7 +52,7 @@ async def load_and_crop(show: bool, save: bool, latest_run: str, output_path) ->
     faceCascade = cv2.CascadeClassifier(FACE_CASCADE)
 
     if args.rem_bg:
-        session = new_session(model_name="u2net_human_seg")
+        session = new_session(model_name=rembg_model_name)
 
     nface = []
     for i, imgurl in enumerate(photo_g):
