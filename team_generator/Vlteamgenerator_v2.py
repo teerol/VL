@@ -1,16 +1,12 @@
-# Python file used to create data to Viestiliiga TV broadcasts
-# 
-# Reads Register file and Teamcsv file
-# Runner Photos must be in the right address shown by register
-# creates Team data csv and HTML interfaces for men and women
-
 import os,sys
 import csv
 tsvFile = "VL-RunnersRegister - Runners.tsv"
 teamcsv_from_irma = "ilmoittautumiset.csv"
-new_csv = "VLteams.csv" # writes team card data to this file
-M_HTML = "VL_juoksijakortit_M.html"
-N_HTML = "VL_juoksijakortit_N.html"
+new_csv = "VLteams.csv" # tanne kirjoitetaan joukkuekortit
+M_HTML = "VL_joukkuekortit_M.html"
+N_HTML = "VL_joukkuekortit_N.html"
+P_to_runners = "VLRunners\\"
+P_to_logos = "logo200\\"
 
 class Runner:
     def __init__(self, name, club, photofile, gender, row):
@@ -22,14 +18,13 @@ class Runner:
 
 
 def name_swap(name):
-    """
-    Changes name from format 
-    Lastname Firstname 
-    => Firstname Lastname
-    Note:
-    There are some names that do
-    not follow this algo
-    """
+    if len(name.split(" "))>2:
+        print(name, "len more than 2")
+    if name == "Schoultz von Katja":
+        return "Katja von Schoultz"
+    if name == "Hällström af Fabian":
+        return "Fabian af Hällström"
+
     l = name.split(' ')
     name = l[-1]
     del l[-1]
@@ -39,7 +34,6 @@ def name_swap(name):
 
 
 def read_runners_and_teams(runnerdir, teamdir):
-    # Runners saved in subdirectories in case of full namesakes
     club_runners = {}
     register = open(tsvFile, 'r', encoding='UTF-8')
     for row in register:
@@ -48,16 +42,18 @@ def read_runners_and_teams(runnerdir, teamdir):
         name = row[4]
         gender = row[2]
         register_row = row[0]
+        gamerphoto = row[14]
+        gamerclubphoto = row[15] 
         try:
-            runner_photo = row[14]
-            club_photo = row[15]
+            runner_photo = P_to_runners + row[11]
+            club_photo = P_to_logos + row[15].split("\\")[-1]
             if os.path.isfile(runner_photo) and os.path.isfile(club_photo):
-                r = Runner(name, club, runner_photo, gender, register_row)
+                r = Runner(name, club, gamerphoto, gender, register_row)
                 try:
                     runnerdir[club][name] = r
                 except KeyError:
                     runnerdir[club] = {name : r}
-                teamdir[club] = club_photo
+                teamdir[club] = gamerclubphoto
         except IndexError:
             continue
 
@@ -66,9 +62,11 @@ def main():
     teamdir = {}
     read_runners_and_teams(runnerdir, teamdir)
     irmacsv = open(teamcsv_from_irma, 'r')
-    rn = 1
+    rn = 0
     runners_found=[]
     extras = []
+    TEAM_SIZE_MAX = 0
+
     with open(new_csv, 'w') as NEW_csv:
         with open(M_HTML, 'w') as MHTML:
             with open(N_HTML, 'w') as NHTML:
@@ -82,6 +80,10 @@ def main():
                     Class = team[0]
                     team_name = team[1]
                     club_name = team[2]
+                    if club_name == "Lahden Suunnistajat-37":
+                        club_name = "Lahden Suunnistajat -37"
+                    if club_name == "Navi":
+                        club_name = "NAVI"
                     del team[0:3]
                     newline="<tr><td><a target='iframe' href ='http://192.168.2.135:8088/api/?Function=DataSourceSelectRow&Value=VLRunners,Teams,"+ str(rn)+"'>"+team_name+"</a></td>"
                     try:
@@ -103,6 +105,12 @@ def main():
                             print(runner, " KeyError, runner")
                             pass
                     if len(runner_photos) == len(team):
+                        tmp_teamlen = len(team)
+                        if tmp_teamlen > TEAM_SIZE_MAX:
+                            TEAM_SIZE_MAX = tmp_teamlen
+                        while tmp_teamlen < TEAM_SIZE_MAX:
+                            row.append("")
+                            tmp_teamlen += 1
                         row += runner_photos
                         # print(row)
                         writer.writerow(row)
@@ -130,7 +138,7 @@ def main():
                                 MHTML.write(sline)
                             elif runnerobj.gender == "N":
                                 NHTML.write(sline)
-                htmlend = "</table></body></html>"
+                htmlend = "</table><iframe name='iframe' height='50px'></iframe></body></html>"
                 NHTML.write(htmlend)
                 MHTML.write(htmlend)
 
