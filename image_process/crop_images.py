@@ -26,7 +26,7 @@ img_stats = 300, 280, 1.9, 0.4 # new setup
 # target size when loading from s3
 TARGET_LOAD_SIZE = 3e5 # pixels
 
-async def load_and_crop(show: bool, save: bool, latest_run: str, output_path) -> None:
+async def load_and_crop(show: bool, latest_run: str, output_path) -> None:
     # to check that are there any new ones
     # read latest run from cache
     if latest_run:
@@ -43,13 +43,12 @@ async def load_and_crop(show: bool, save: bool, latest_run: str, output_path) ->
     with open("latest_run.txt", "w") as f:
         f.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
-    if save and output_path:
+    if output_path:
         result_folder = Path(output_path)
-        # (result_folder/"bg").mkdir(parents=True, exist_ok=True)
-        (result_folder/"crop").mkdir(parents=True, exist_ok=True)
+        (result_folder / "crop").mkdir(parents=True, exist_ok=True)
+        (result_folder / "bg").mkdir(parents=True, exist_ok=True)
 
-    download_haarcascade()
-    faceCascade = cv2.CascadeClassifier(FACE_CASCADE)
+    faceCascade = get_haarcascade()
 
     if args.rem_bg:
         session = new_session(model_name=rembg_model_name)
@@ -74,6 +73,7 @@ async def load_and_crop(show: bool, save: bool, latest_run: str, output_path) ->
         padded_image = resize_and_pad(img, face, *img_stats)
 
         cropped_image = resize_and_crop(img, face, *img_stats)
+
         if len(cropped_image) == 0:
             print("face too big!", imgurl)
             cropped_image = np.zeros_like(padded_image)
@@ -88,21 +88,10 @@ async def load_and_crop(show: bool, save: bool, latest_run: str, output_path) ->
                 else np.concatenate((org, cropped_image, padded_image, bg_removed[:,:,:-1]), axis=1),
             title="org(not in scale), cropped, padded, background removed", xticks=[], yticks=[])
 
-        if save:
-            imgpath = Path(imgurl)
-            fol = "-".join(imgpath.parts[-4: -1]) + "-"
-            print(str(result_folder / "crop" / (fol + imgpath.name)))
-            if imgpath.suffix ==".jfif":
-                # save as jpg, rename to jfif
-                asjpg = result_folder / "crop" / (fol + (imgpath.stem + ".jpg"))
-                cv2.imwrite(str(asjpg), cropped_image)
-                asjpg.rename(result_folder / "crop" / (fol + (imgpath.stem + ".jfif")))
-            else:
-                cv2.imwrite(str(result_folder / "crop" / (fol + imgpath.name)), cropped_image)
-                if args.rem_bg:
-                    cv2.imwrite(str(result_folder/"bg"/(fol+(imgpath.stem+".png"))), bg_removed)
+        if output_path:
+           save_images(result_folder, imgurl, cropped_image, bg_removed if args.rem_bg else None)
         
-    with open("no_face.txt", "w") as f:
+    with open(CACHE_DIR / "no_face.txt", "w") as f:
         f.write("\n".join(nface))
 
 
@@ -113,6 +102,20 @@ def cv2_imshow(img, **kwargs):
         plt_func(val)
     plt.show()
     # plt.pause(1)
+
+def save_images(result_folder: Path, imgurl: str, cropped_image: np.ndarray, bg_removed: np.ndarray | None) -> None:
+    imgpath = Path(imgurl)
+    fol = "-".join(imgpath.parts[-4: -1]) + "-"
+    print(str(result_folder / "crop" / (fol + imgpath.name)))
+    if imgpath.suffix == ".jfif":
+        # save as jpg, rename to jfif
+        asjpg = result_folder / "crop" / (fol + (imgpath.stem + ".jpg"))
+        cv2.imwrite(str(asjpg), cropped_image)
+        asjpg.rename(result_folder / "crop" / (fol + (imgpath.stem + ".jfif")))
+    else:
+        cv2.imwrite(str(result_folder / "crop" / (fol + imgpath.name)), cropped_image)
+        if args.rem_bg and bg_removed is not None:
+            cv2.imwrite(str(result_folder / "bg" / (fol + (imgpath.stem + ".png"))), bg_removed)
 
 
 def detect_with_rotate(
@@ -220,18 +223,18 @@ def resize_and_crop(
     img_crop = img[dy: dy + dh , dx: dx + dw]
     return cv2.resize(img_crop, (target_width, target_height))
 
-def download_haarcascade() -> None:
+def get_haarcascade() -> cv2.CascadeClassifier:
     url = "https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml"
     if not os.path.exists(FACE_CASCADE):
         print("downloading haarcascade...")
         response = requests.get(url)
         with open(FACE_CASCADE, 'wb') as file:
             file.write(response.content)
+    return cv2.CascadeClassifier(FACE_CASCADE)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--show", action="store_true", help="show images, blocks the execution")
-    parser.add_argument("--save", action="store_true", help="save images to output_path")
     parser.add_argument("--latest_run", type=str, default=None, help='Takes only images updated after latest run! Optional parameter, latest run datetime, format "YYYY-MM-DD HH:MM:SS". If not provided, the latest run will be read from "latest_run.txt" or set to beginning of time')
     parser.add_argument("--output_path", type=str, default=None, help="output path to save images. Crop and background removed images will be saved to 'output_path/crop' and 'output_path/bg' respectively")
     parser.add_argument("--rem_bg", action="store_true", help="remove background, NOTE: This is a lot slower and results vary")
@@ -249,5 +252,5 @@ if __name__ == "__main__":
         from rembg import remove, new_session
 
     asyncio.run(
-        load_and_crop(args.show, args.save, args.latest_run, args.output_path)
+        load_and_crop(args.show, args.latest_run, args.output_path)
     )
