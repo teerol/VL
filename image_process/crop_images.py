@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from typing import Tuple
 from datetime import datetime
 from pathlib import Path
+from PIL import Image
+
 
 from get_runners_async import get_runners_async, get_photo
 
@@ -89,7 +91,9 @@ async def load_and_crop(show: bool, latest_run: str, output_path) -> None:
             title="org(not in scale), cropped, padded, background removed", xticks=[], yticks=[])
 
         if output_path:
-           save_images(result_folder, imgurl, cropped_image, bg_removed if args.rem_bg else None)
+           save_images(
+               result_folder, imgurl, img_o, cropped_image, bg_removed if args.rem_bg else None
+            )
         
     with open(CACHE_DIR / "no_face.txt", "w") as f:
         f.write("\n".join(nface))
@@ -103,9 +107,16 @@ def cv2_imshow(img, **kwargs):
     plt.show()
     # plt.pause(1)
 
-def save_images(result_folder: Path, imgurl: str, cropped_image: np.ndarray, bg_removed: np.ndarray | None) -> None:
+def save_images(
+        result_folder: Path,
+        imgurl: str,
+        original_image: Image,
+        cropped_image: np.ndarray,
+        bg_removed: np.ndarray | None
+    ) -> None:
     imgpath = Path(imgurl)
     fol = "-".join(imgpath.parts[-4: -1]) + "-"
+    original_image.save(str(result_folder / "originals" / (fol + imgpath.name)))
     print(str(result_folder / "crop" / (fol + imgpath.name)))
     if imgpath.suffix == ".jfif":
         # save as jpg, rename to jfif
@@ -236,7 +247,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--show", action="store_true", help="show images, blocks the execution")
     parser.add_argument("--latest_run", type=str, default=None, help='Takes only images updated after latest run! Optional parameter, latest run datetime, format "YYYY-MM-DD HH:MM:SS". If not provided, the latest run will be read from "latest_run.txt" or set to beginning of time')
-    parser.add_argument("--output_path", type=str, default=None, help="output path to save images. Crop and background removed images will be saved to 'output_path/crop' and 'output_path/bg' respectively")
+    parser.add_argument("--output_path", type=str, default=None, help="output path to save images. Original, crop and background removed images will be saved to 'output_path/originals', 'output_path/crop' and 'output_path/bg' respectively")
     parser.add_argument("--rem_bg", action="store_true", help="remove background, NOTE: This is a lot slower and results vary")
 
     args = parser.parse_args()
