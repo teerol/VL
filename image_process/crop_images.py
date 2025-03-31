@@ -19,7 +19,8 @@ if not os.path.exists(CACHE_DIR):
 FACE_CASCADE = CACHE_DIR / "haarcascade_frontalface_default.xml"
 latest_run_file = CACHE_DIR / "latest_run.txt"
 
-rembg_model_name = "u2net_human_seg" # birefnet-portrait, sam
+# rembg_model_name = "u2net_human_seg"
+rembg_model_name = "birefnet-portrait"
 
 # target metrics for images
 # width, height, width_scale, height_scale
@@ -47,6 +48,7 @@ async def load_and_crop(show: bool, latest_run: str, output_path) -> None:
     
     if output_path:
         result_folder = Path(output_path)
+        (result_folder / "originals").mkdir(parents=True, exist_ok=True)
         (result_folder / "crop").mkdir(parents=True, exist_ok=True)
         (result_folder / "bg").mkdir(parents=True, exist_ok=True)
 

@@ -1,4 +1,7 @@
 cached/
+sam/
+u2net/
+birefnet/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

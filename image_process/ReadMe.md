@@ -48,7 +48,7 @@ options:
 
 ### Example
 ```sh
-> python crop_images.py --save --output_path images/
+> python crop_images.py --output_path images/
 ```
 
 Create a index file of `name;club;photos` by running.
