@@ -2,5 +2,6 @@ matplotlib
 aiohttp
 requests
 numpy==1.26.4
-opencv-python==4.11.0.86
+opencv-python==4.11.0.86 # try to get rid of this
 Pillow==11.1.0
+mediapipe==0.10.21

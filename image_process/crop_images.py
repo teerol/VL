@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from pathlib import Path
 from PIL import Image
-import cv2
+import cv2 # try to get rid of this
 
 import mediapipe as mp
 from mediapipe.tasks import python
