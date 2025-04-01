@@ -68,6 +68,7 @@ async def get_runners_async(
 def get_photo(url: str, target_size: int = 3e5, downsample: bool = True) -> Image.Image:
     res = requests.get(url)
     img = Image.open(BytesIO(res.content))
+    img = img.convert("RGB")
     if not downsample:
         return img
 
