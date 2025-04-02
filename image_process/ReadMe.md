@@ -33,17 +33,22 @@ Notes on backgroud removal:
 
 To run the `crop_images.py` script, use the following options:
 ```sh
-usage: crop_images.py [-h] [--show] [--latest_run LATEST_RUN] [--output_path OUTPUT_PATH] [--rem_bg]
+usage: crop_images.py [-h] [--latest_run LATEST_RUN] [--output_path OUTPUT_PATH] [--rem_bg]
+                      [--originals_folder ORIGINALS_FOLDER]
 
 options:
   -h, --help            show this help message and exit
-  --show                show images, blocks the execution
   --latest_run LATEST_RUN
-                        Takes only images updated after latest run! Optional parameter, latest run datetime, format "YYYY-MM-DD HH:MM:SS". If not provided, the latest run will be read from "latest_run.txt" or set to       
-                        beginning of time
+                        Takes only images updated after latest run! Optional parameter, latest run datetime,   
+                        format "YYYY-MM-DD HH:MM:SS". If not provided, the latest run will be read from        
+                        "latest_run.txt" or set to beginning of time
   --output_path OUTPUT_PATH
-                        output path to save images. Original, crop and background removed images will be saved to 'output_path/originals', 'output_path/crop' and 'output_path/bg' respectively
+                        output path to save images. Original, crop and background removed images will be       
+                        saved to 'output_path/originals', 'output_path/crop' and 'output_path/bg'
+                        respectively
   --rem_bg              remove background, NOTE: This is a lot slower and results vary
+  --originals_folder ORIGINALS_FOLDER
+                        if given load images from here instead of downloading from s3
 ```
 
 ### Example
