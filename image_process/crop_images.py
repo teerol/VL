@@ -2,6 +2,7 @@ import os
 import requests
 import argparse
 import asyncio
+import urllib.parse
 import numpy as np
 from datetime import datetime
 from pathlib import Path
@@ -125,6 +126,7 @@ def save_images(
         padded_image: Image.Image,
         bg_removed: Image.Image | None
     ) -> None:
+    imgurl = urllib.parse.unquote(imgurl)
     imgpath = Path(imgurl)
     fol = "-".join(imgpath.parts[-4: -1]) + "-"
     original_image.save(str(result_folder / "originals" / (fol + imgpath.name)))

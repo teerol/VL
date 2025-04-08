@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import requests
+import urllib.parse
 from dataclasses import dataclass
 from get_runners_async import CACHE_FILE, OFAN_URL, DEFAULT_IMAGE_URL
 
@@ -14,6 +15,7 @@ class Runner:
     bgpath: Path | None
 
 def solve_img_names(imgurl: str) -> tuple[str, str, str]:
+    imgurl = urllib.parse.unquote(imgurl)
     imgpath = Path(imgurl)
     fol = "-".join(imgpath.parts[-4: -1])
     original = f"originals/{fol}-{imgpath.name}"
